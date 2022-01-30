@@ -1,0 +1,13 @@
+{
+    "name": "edgar/edgar-plugin",
+    "description": "this is an awesome plugin",
+    "type": "project",
+    "license": "GPL",
+    "autoload": {
+        "psr-4": {
+            "Inc\\": "inc/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}

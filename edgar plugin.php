@@ -40,8 +40,50 @@ if( ! function_exists('add_action')){
 
 class EdgarPlugin {
 
-    public static function register(){
-        add_action('admin_enqueue_scripts',array('EdgarPlugin','enqueue'));
+    public $plugin;
+
+    public function __construct()
+    {
+        $this->plugin = plugin_basename(__FILE__);
+    }
+
+    public function register(){
+        add_action('admin_enqueue_scripts',array($this,'enqueue'));
+
+        add_action('admin_menu',array($this,'add_admin_pages'));
+
+        add_filter("plugin_action_links_$this->plugin",array($this,'settings_link'));
+    }
+
+    public function settings_link($links)
+    {
+        $settings_link = '<a href="admin.php?page=edgar_plugin">Settings</a>';
+
+        array_push($links,$settings_link);
+
+        return $links;
+
+    }
+
+    public function add_admin_pages()
+    {
+        add_menu_page('Edgar Plugin','Edgar','manage_options','edgar_plugin',array($this,'admin_index'),'dashicons-superhero-alt',110);
+    }
+
+    public function admin_index()
+    {
+        // Require Template
+        require_once plugin_dir_path(__FILE__) . '/templates/admin.php';
+    }
+
+    function activate(){
+        // Flush the rewrite rules
+        flush_rewrite_rules();
+    }
+
+    function deactivate(){
+        // Flush the rewrite rules
+        flush_rewrite_rules();
     }
 
     function add_book_post_type(){
@@ -56,19 +98,20 @@ class EdgarPlugin {
         wp_enqueue_style('my_plugin_style',plugins_url('/assets/style.css',__FILE__));
         wp_enqueue_script('my_plugin_style',plugins_url('/assets/script.js',__FILE__));
     }
+
+
 }
 
 if(class_exists('EdgarPlugin')){
-//    $edgarPlugin = new EdgarPlugin();
-//    $edgarPlugin->create_custom_post_type();
-//    $edgarPlugin->register();
+    $edgarPlugin = new EdgarPlugin();
+    $edgarPlugin->create_custom_post_type();
+    $edgarPlugin->register();
 
-    EdgarPlugin::register();
 }
 
-require_once plugin_dir_path(__FILE__) . '/inc/edgar_plugin_activate.php';
-register_activation_hook(__FILE__,array('EdgarPluginActivate','activate'));
+//require_once plugin_dir_path(__FILE__) . '/inc/edgar_plugin_activate.php';
+register_activation_hook(__FILE__,array($edgarPlugin,'activate'));
 
 
-require_once plugin_dir_path(__FILE__) . '/inc/edgar_plugin_deactivate.php';
-register_deactivation_hook(__FILE__,array('EdgarPluginDeactivate','deactivate'));
+//require_once plugin_dir_path(__FILE__) . '/inc/edgar_plugin_deactivate.php';
+register_deactivation_hook(__FILE__,array($edgarPlugin,'deactivate'));
